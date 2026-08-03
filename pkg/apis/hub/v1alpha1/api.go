@@ -65,6 +65,16 @@ type APISpec struct {
 	// Cors defines the Cross-Origin Resource Sharing configuration.
 	// +optional
 	Cors *Cors `json:"cors,omitempty"`
+	// APIAuths defines the API authentication configuration.
+	// +optional
+	// +kubebuilder:validation:MinItems=1
+	APIAuths []APIAuthReference `json:"apiAuths,omitempty"`
+}
+
+// APIAuthReference references an APIAuth resource for authentication configuration.
+type APIAuthReference struct {
+	Name            string           `json:"name"`
+	OperationFilter *OperationFilter `json:"operationFilter,omitempty"`
 }
 
 // Cors defines the Cross-Origin Resource Sharing configuration.

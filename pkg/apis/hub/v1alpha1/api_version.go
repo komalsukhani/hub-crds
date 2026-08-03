@@ -65,6 +65,11 @@ type APIVersionSpec struct {
 	// Cors defines the Cross-Origin Resource Sharing configuration.
 	// +optional
 	Cors *Cors `json:"cors,omitempty"`
+
+	// APIAuths defines the API authentication configuration.
+	// +optional
+	// +kubebuilder:validation:MinItems=1
+	APIAuths []APIAuthReference `json:"apiAuths,omitempty"`
 }
 
 // APIVersionStatus is the status of an APIVersion.

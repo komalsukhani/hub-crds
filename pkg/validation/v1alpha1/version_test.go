@@ -76,7 +76,12 @@ spec:
               - GET
               - OPTION
     refreshInterval: 3m
-  release: v1.0.0`),
+  release: v1.0.0
+  apiAuths:
+    - name: my-api-auth
+      operationFilter:
+        include:
+          - my-operation-set`),
 		},
 		{
 			desc: "missing resource namespace",
@@ -615,6 +620,89 @@ spec:
     path: /openapi.json
     refreshInterval: 30s`),
 			wantErrs: field.ErrorList{{Type: field.ErrorTypeInvalid, Field: "spec.openApiSpec.refreshInterval", BadValue: "30s", Detail: "must be at least 1m"}},
+		},
+		{
+			desc: "valid: apiAuths without operationFilter",
+			manifest: []byte(`
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIVersion
+metadata:
+  name: my-api-v1
+  namespace: my-ns
+spec:
+  release: v1.0.0
+  openApiSpec:
+    path: /openapi.json
+  apiAuths:
+    - name: my-api-auth`),
+		},
+		{
+			desc: "valid: multiple apiAuths",
+			manifest: []byte(`
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIVersion
+metadata:
+  name: my-api-v1
+  namespace: my-ns
+spec:
+  release: v1.0.0
+  openApiSpec:
+    path: /openapi.json
+  apiAuths:
+    - name: my-api-auth
+    - name: my-other-api-auth
+      operationFilter:
+        include:
+          - my-operation-set`),
+		},
+		{
+			desc: "apiAuths cannot be empty",
+			manifest: []byte(`
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIVersion
+metadata:
+  name: my-api-v1
+  namespace: my-ns
+spec:
+  release: v1.0.0
+  openApiSpec:
+    path: /openapi.json
+  apiAuths: []`),
+			wantErrs: field.ErrorList{{Type: field.ErrorTypeInvalid, Field: "spec.apiAuths", BadValue: int64(0), Detail: "spec.apiAuths in body should have at least 1 items"}},
+		},
+		{
+			desc: "missing apiAuths name",
+			manifest: []byte(`
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIVersion
+metadata:
+  name: my-api-v1
+  namespace: my-ns
+spec:
+  release: v1.0.0
+  openApiSpec:
+    path: /openapi.json
+  apiAuths:
+    - operationFilter:
+        include:
+          - my-operation-set`),
+			wantErrs: field.ErrorList{{Type: field.ErrorTypeRequired, Field: "spec.apiAuths[0].name", BadValue: "", Detail: ""}},
+		},
+		{
+			desc: "valid: apiAuths with an empty operationFilter",
+			manifest: []byte(`
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIVersion
+metadata:
+  name: my-api-v1
+  namespace: my-ns
+spec:
+  release: v1.0.0
+  openApiSpec:
+    path: /openapi.json
+  apiAuths:
+    - name: my-api-auth
+      operationFilter: {}`),
 		},
 	}
 
