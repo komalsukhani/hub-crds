@@ -648,6 +648,10 @@ spec:
   release: v1.0.0
   openApiSpec:
     path: /openapi.json
+    operationSets:
+    - name: my-operation-set
+      matchers:
+        - path: /foo
   apiAuths:
     - name: my-api-auth
     - name: my-other-api-auth
@@ -686,10 +690,60 @@ spec:
     - operationFilter:
         include:
           - my-operation-set`),
-			wantErrs: field.ErrorList{{Type: field.ErrorTypeRequired, Field: "spec.apiAuths[0].name", BadValue: "", Detail: ""}},
+			wantErrs: field.ErrorList{
+				{Type: field.ErrorTypeRequired, Field: "spec.apiAuths[0].name", BadValue: "", Detail: ""},
+				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: "object", Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
+			},
 		},
 		{
-			desc: "valid: apiAuths with an empty operationFilter",
+			desc: "operationFilter referencing an undefined operation set",
+			manifest: []byte(`
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIVersion
+metadata:
+  name: my-api-v1
+  namespace: my-ns
+spec:
+  release: v1.0.0
+  openApiSpec:
+    path: /openapi.json
+    operationSets:
+    - name: read
+      matchers:
+        - path: /foo
+  apiAuths:
+    - name: my-api-auth
+    - name: reader
+      operationFilter:
+        include:
+          - read
+          - missing`),
+			wantErrs: field.ErrorList{
+				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: "object", Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
+			},
+		},
+		{
+			desc: "operationFilter without an openApiSpec",
+			manifest: []byte(`
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIVersion
+metadata:
+  name: my-api-v1
+  namespace: my-ns
+spec:
+  release: v1.0.0
+  apiAuths:
+    - name: my-api-auth
+    - name: reader
+      operationFilter:
+        include:
+          - read`),
+			wantErrs: field.ErrorList{
+				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: "object", Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
+			},
+		},
+		{
+			desc: "apiAuths with an empty operationFilter",
 			manifest: []byte(`
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIVersion
@@ -703,6 +757,9 @@ spec:
   apiAuths:
     - name: my-api-auth
       operationFilter: {}`),
+			wantErrs: field.ErrorList{
+				{Type: field.ErrorTypeRequired, Field: "spec.apiAuths[0].operationFilter.include", BadValue: "", Detail: ""},
+			},
 		},
 	}
 

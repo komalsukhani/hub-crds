@@ -42,6 +42,7 @@ type APIVersion struct {
 }
 
 // APIVersionSpec configures an APIVersion.
+// +kubebuilder:validation:XValidation:message="operationFilter.include must only reference operation sets defined in openApiSpec.operationSets",rule="!has(self.apiAuths) || self.apiAuths.all(a, !has(a.operationFilter) || !has(a.operationFilter.include) || a.operationFilter.include.all(n, has(self.openApiSpec) && has(self.openApiSpec.operationSets) && self.openApiSpec.operationSets.exists(s, s.name == n)))"
 type APIVersionSpec struct {
 	// Title is the public facing name of the APIVersion.
 	// +optional
@@ -69,6 +70,7 @@ type APIVersionSpec struct {
 	// APIAuths defines the API authentication configuration.
 	// +optional
 	// +kubebuilder:validation:MinItems=1
+	// +kubebuilder:validation:MaxItems=8
 	APIAuths []APIAuthReference `json:"apiAuths,omitempty"`
 }
 

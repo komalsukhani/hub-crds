@@ -65,6 +65,7 @@ spec:
                   required:
                   - name
                   type: object
+                maxItems: 8
                 minItems: 1
                 type: array
               cors:
@@ -271,6 +272,13 @@ spec:
                 minItems: 1
                 type: array
             type: object
+            x-kubernetes-validations:
+            - message: operationFilter.include must only reference operation sets
+                defined in openApiSpec.operationSets
+              rule: '!has(self.apiAuths) || self.apiAuths.all(a, !has(a.operationFilter)
+                || !has(a.operationFilter.include) || a.operationFilter.include.all(n,
+                has(self.openApiSpec) && has(self.openApiSpec.operationSets) && self.openApiSpec.operationSets.exists(s,
+                s.name == n)))'
           status:
             description: The current status of this API.
             properties:

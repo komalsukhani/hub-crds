@@ -41,6 +41,7 @@ type API struct {
 }
 
 // APISpec describes the API.
+// +kubebuilder:validation:XValidation:message="operationFilter.include must only reference operation sets defined in openApiSpec.operationSets",rule="!has(self.apiAuths) || self.apiAuths.all(a, !has(a.operationFilter) || !has(a.operationFilter.include) || a.operationFilter.include.all(n, has(self.openApiSpec) && has(self.openApiSpec.operationSets) && self.openApiSpec.operationSets.exists(s, s.name == n)))"
 type APISpec struct {
 	// Title is the human-readable name of the API that will be used on the portal.
 	// +optional
@@ -68,6 +69,7 @@ type APISpec struct {
 	// APIAuths defines the API authentication configuration.
 	// +optional
 	// +kubebuilder:validation:MinItems=1
+	// +kubebuilder:validation:MaxItems=8
 	APIAuths []APIAuthReference `json:"apiAuths,omitempty"`
 }
 
