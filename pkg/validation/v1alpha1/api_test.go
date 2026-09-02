@@ -604,7 +604,7 @@ spec:
           - my-operation-set`),
 			wantErrs: field.ErrorList{
 				{Type: field.ErrorTypeRequired, Field: "spec.apiAuths[0].name", BadValue: "", Detail: ""},
-				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: "object", Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
+				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: field.OmitValueType{}, Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
 			},
 		},
 		{
@@ -630,7 +630,7 @@ spec:
           - read
           - missing`),
 			wantErrs: field.ErrorList{
-				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: "object", Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
+				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: field.OmitValueType{}, Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
 			},
 		},
 		{
@@ -649,11 +649,11 @@ spec:
         include:
           - read`),
 			wantErrs: field.ErrorList{
-				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: "object", Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
+				{Type: field.ErrorTypeInvalid, Field: "spec", BadValue: field.OmitValueType{}, Detail: "operationFilter.include must only reference operation sets defined in openApiSpec.operationSets"},
 			},
 		},
 		{
-			desc: "apiAuths with an empty operationFilter",
+			desc: "valid: apiAuths with an empty operationFilter",
 			manifest: []byte(`
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
@@ -664,9 +664,6 @@ spec:
   apiAuths:
     - name: my-api-auth
       operationFilter: {}`),
-			wantErrs: field.ErrorList{
-				{Type: field.ErrorTypeRequired, Field: "spec.apiAuths[0].operationFilter.include", BadValue: "", Detail: ""},
-			},
 		},
 	}
 
